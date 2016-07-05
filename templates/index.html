@@ -19,10 +19,18 @@
     <script>
         window.addEventListener('load', function () {
 
+            // WebRTC
+            var RTCSessionDescription = window.RTCSessionDescription;
+            var RTCPeerConnection = window.webkitRTCPeerConnection;
+            var RTCIceCandidate = window.RTCIceCandidate;
+
+            var pcConfig = {'iceServers': [{'url': 'stun:stun.l.google.com:19302'}]};
+            var pcConstraints = {'optional': [{'DtlsSrtpKeyAgreement': true}]};
+            
 
             // DOM elements
             var input = document.getElementById('input');
-            var output = document.getElementById('output');
+            var output = document.getElementById('content');
             var state = document.getElementById('status'); 
 
             // websocket connection to signaling server
@@ -30,8 +38,9 @@
 
             // session details
             // username is stored in sessionStorage
-            var available_peers = [];
-            var mentor_name = null;
+            var availablePeers = [];
+            var mentorName = null;
+
 
             // syntactic sugar for array membership
             Array.prototype.includes = function(value){
@@ -40,14 +49,14 @@
                         return true;
                 return false;
             }
- 
+
+
             /*
              * Add message to user output.
              * @param msg: string, text message to peer
              */
             function addmessage(msg) {
-                if (output)
-                    output.insertAdjacentHTML('afterbegin', "<p><span>" + msg + "</span></p>");
+                output.insertAdjacentHTML('afterbegin', "<p><span>" + msg + "</span></p>");
             }
 
 
@@ -82,14 +91,22 @@
                 }                    
             });
 
-            socket.on('greeting', function(message){
-                var greeting = message.greeting;
-                addmessage(greeting);
+
+            /*
+             * handler for inital greeting message from server
+             */
+            socket.on('greeting', function(message){ 
+                addmessage(message);
+            });
+
+            socket.on('request offer', function(request){
+                console.log(request);                
             });
 
             window.beforeunload = function(){
                  socket.close();
             };
+
 
             input.onkeypress = function(e) {
 		       if (e.keyCode == 13) {
