@@ -18,10 +18,37 @@
     <script type="text/javascript" src="static/js/socket.io/socket.io.js"></script>
     <script>
         window.addEventListener('load', function () {
+
+
+            // DOM elements
             var input = document.getElementById('input');
             var output = document.getElementById('output');
             var state = document.getElementById('status'); 
+
+            // websocket connection to signaling server
             var socket = io(document.location.host, {'session': 'data'});
+
+            // session details
+            // username is stored in sessionStorage
+            var available_peers = [];
+            var mentor_name = null;
+
+            // syntactic sugar for array membership
+            Array.prototype.includes = function(value){
+                for (var i=0; i<=this.length; i++)
+                    if (this[i] == value)
+                        return true;
+                return false;
+            }
+ 
+            /*
+             * Add message to user output.
+             * @param msg: string, text message to peer
+             */
+            function addmessage(msg) {
+                if (output)
+                    output.insertAdjacentHTML('afterbegin', "<p><span>" + msg + "</span></p>");
+            }
 
 
             /*
@@ -52,13 +79,12 @@
                     socket.emit('session', {
                         'token': token
                     });                   
-                }
-                    
+                }                    
             });
 
-            socket.on('message', function(message){
-                if (message.greeting)
-                    console.log(message.greeting);
+            socket.on('greeting', function(message){
+                var greeting = message.greeting;
+                addmessage(greeting);
             });
 
             window.beforeunload = function(){
