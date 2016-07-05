@@ -1,4 +1,3 @@
-
 """
 A simple signaling server for setting up initial peer connections.
 """
@@ -59,19 +58,33 @@ def disconnect_handler():
 
 @socketio.on('session')
 def session_handler(message):
+    peer = None
     name = message['token']
     if name not in connected_peers.keys():
         print('%s has connected' % name)
         peer = PeerConnection(sid=request.sid, name=name)
         connected_peers[peer.name] = peer
         peer.emit('greeting', 'Welcome to the Galaxy %s.' % peer.name)
+        peer.emit('request offer', 'requesting offer')
+        print('%s peers connected' % len(connected_peers.keys()))
+        print(connected_peers)
     else:
         print('%s has connected')
         peer = connected_peers[name]
         peer.sid = request.sid
         peer.emit('greeting', 'Welcome to the Galaxy %s.' % peer.name)
+        print('%s peers connected' % len(connected_peers.keys()))
+        print(connected_peers)
 
-    print(connected_peers)
+    # select 'mentor' for peer, and send request an offer to peer for mentor
+    try:
+        other_peer = random.choice(
+                list(set(connected_peers.keys()) - set(peer.name)))
+        peer.emit('request offer', {
+            'callee': other_peer
+        })
+    except IndexError:
+        print("no other peer to connect to :(")
 
 
 if __name__ == '__main__':
