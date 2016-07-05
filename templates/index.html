@@ -23,27 +23,42 @@
             var state = document.getElementById('status'); 
             var socket = io(document.location.host, {'session': 'data'});
 
+
+            /*
+             * connection/disconnection handlers
+             */
             socket.on('connect', function(){
                 console.log('connected to signaling server');
                 input.removeAttribute('disabled');
-                if (window.sessionStorage['token'] != undefined){
-                    var token = window.sessionStorage['token'];
-                    socket.emit('session', {
-                        'token': token
-                    });
-                }
                 }).on('disconnect', function(){
                 console.log('disconnected from signaling server');
                 input.setAttribute('disabled', 'disabled');
             });
 
+
+            /*
+             * socket session handler 
+             */
             socket.on('session', function(message){
-                if (window.sessionStorage['token'] == undefined)
-                    window.sessionStorage.setItem('token', message.token);
+                if (window.sessionStorage['token'] == undefined) {
+                    var token = message.token;
+                    window.sessionStorage.setItem('token', token);
+                    socket.emit('session', {
+                        'token': message.token
+                    });
+                } else {
+                    // if there is a name, tell server
+                    var token = window.sessionStorage['token'];
+                    socket.emit('session', {
+                        'token': token
+                    });                   
+                }
+                    
             });
-       
+
             socket.on('message', function(message){
-                console.log('recieved message', message);
+                if (message.greeting)
+                    console.log(message.greeting);
             });
 
             window.beforeunload = function(){
