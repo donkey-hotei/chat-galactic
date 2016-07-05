@@ -15,42 +15,57 @@
         #status { width:88px; display:block; float:left; margin-top:15px; }
         #button { width:20px; display:block; float:right; margin-top:10px; }
     </style>
-    <script type="text/javascript" src="static/socket.io/socket.io.js"></script>
-    <script> 
-    
-        window.addEventListener('load', function() {             
-            var output = document.getElementById('output');
+    <script type="text/javascript" src="static/js/socket.io/socket.io.js"></script>
+    <script>
+        window.addEventListener('load', function () {
             var input = document.getElementById('input');
-
-            var port = 5000
-            var socket = io(document.location.hostname + ":" + port);                     
+            var output = document.getElementById('output');
+            var state = document.getElementById('status'); 
+            var socket = io(document.location.host, {'session': 'data'});
 
             socket.on('connect', function(){
-                socket.emit('init', {'message': 'galaxy'});
+                console.log('connected to signaling server');
+                input.removeAttribute('disabled');
+                if (window.sessionStorage['token'] != undefined){
+                    var token = window.sessionStorage['token'];
+                    socket.emit('session', {
+                        'token': token
+                    });
+                }
+                }).on('disconnect', function(){
+                console.log('disconnected from signaling server');
+                input.setAttribute('disabled', 'disabled');
             });
 
-         
-            window.onunload = function(){
-                 socket.close();
-            }
+            socket.on('session', function(message){
+                if (window.sessionStorage['token'] == undefined)
+                    window.sessionStorage.setItem('token', message.token);
+            });
+       
+            socket.on('message', function(message){
+                console.log('recieved message', message);
+            });
 
-            var input = document.getElementById('input');
-	        input.onkeypress = function(e) {
-		        if (e.keyCode == 13) {
-                    var message = {};
-                    message.payload = input.value;
-                    console.log('Sending message', message);
-                    socket.send(JSON.stringify(message));
-                    return false;
-                }
+            window.beforeunload = function(){
+                 socket.close();
+            };
+
+            input.onkeypress = function(e) {
+		       if (e.keyCode == 13) {
+                   var message = {};
+                   message.payload = input.value;
+                   console.log('Sending message', message);
+                   socket.emit('message', JSON.stringify(message));
+                   return false;
+               }
             };
         });
     </script>
     <body>
         <div id="content"></div>
         <div>
-            <span id="status">Online</span>
-            <input type="text" id="input" onkeypress="return "/>
+            <span id="status">welcome</span>
+            <input type="text" id="input" disabled="disabled"/>
         </div>
     </body>
 </head>
