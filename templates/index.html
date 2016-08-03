@@ -14,6 +14,7 @@
                  margin-top:10px; padding:5px; width:400px;  }
         #status { width:88px; display:block; float:left; margin-top:15px; }
         #button { width:20px; display:block; float:right; margin-top:10px; }
+        #userlist { width:100px; display:block; float:center; marigin-top:10px }
     </style>
     <script type="text/javascript" src="static/js/socket.io/socket.io.js"></script>
     <script>
@@ -32,6 +33,7 @@
             var input = document.getElementById('input');
             var output = document.getElementById('content');
             var state = document.getElementById('status'); 
+            var userlist = document.getElementById('userlist');
 
             // websocket connection to signaling server
             var socket = io(document.location.host, {'session': 'data'});
@@ -59,6 +61,32 @@
                 output.insertAdjacentHTML('afterbegin', "<p><span>" + msg + "</span></p>");
             }
 
+            /*
+             * Add user to user list.
+             * @param user: string, username of user
+             */
+            function adduser(user) {
+                console.log("Available peers: ", availablePeers);
+                if (!availablePeers.includes(user)){
+                    console.log("Adding user to user list", user);
+                    availablePeers.push(user);
+                    userlist.add(new Option(user));
+                }
+            }
+
+            /*
+             * Remove user from user list.
+             * @param user: string, username of user
+             */
+            function removeuser(user){
+                for (var i=0; i <= availablePeers.length; i++)
+                    if (userlist[i].text == user){
+                        userlist.remove(i)
+                        var index = availablePeers.indexOf(user);
+                        availablePeers.splice(index, 1);
+                        console.log("Available peers: ", availablePeers);
+                    }
+            }
 
             /*
              * connection/disconnection handlers
@@ -100,9 +128,23 @@
             });
 
             socket.on('request offer', function(request){
-                console.log(request);                
+                console.log("Received request offer:", request.available_peers);
+                var available_peers = request.available_peers;
+                for (var i = 0; i <= available_peers.length; i++)
+                    adduser(available_peers[i]);
+ 
             });
 
+            socket.on('peer connected', function(message){
+                console.log("New peer connected:", message);
+                adduser(message.peer);
+            });
+
+            socket.on('peer disconnected', function(message){
+                console.log("Peer disconnected:", message); 
+                removeuser(message.peer);
+            });
+            
             window.beforeunload = function(){
                  socket.close();
             };
@@ -125,6 +167,7 @@
             <span id="status">welcome</span>
             <input type="text" id="input" disabled="disabled"/>
         </div>
+        <select id="userlist" size=10> </select>
     </body>
 </head>
 </html>

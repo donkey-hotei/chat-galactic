@@ -27,10 +27,16 @@ class PeerConnection:
 
 
 def find_peer(sid):
-    """Find peer by session id."""
+    """Find peer by session id (a str)."""
     for name, peer in connected_peers.items():
         if peer.sid == sid:
             return peer
+
+
+def broadcast(event, data):
+    """Broadcast message event with data to each connected peer."""
+    for peer in connected_peers.values():
+        peer.emit(event, data)
 
 
 @app.route('/')
@@ -54,6 +60,7 @@ def disconnect_handler():
         print('%s is disconnecting' % peer.name)
         print('%d peers connected' % len(connected_peers.keys()))
         print(connected_peers)
+        broadcast('peer disconnected', {'peer': peer.name})
 
 
 @socketio.on('session')
@@ -65,26 +72,25 @@ def session_handler(message):
         peer = PeerConnection(sid=request.sid, name=name)
         connected_peers[peer.name] = peer
         peer.emit('greeting', 'Welcome to the Galaxy %s.' % peer.name)
-        peer.emit('request offer', 'requesting offer')
+        # send list of known peers along with request offer
+        peer.emit('request offer', {
+            'available_peers': connected_peers.keys()
+        })
+
         print('%s peers connected' % len(connected_peers.keys()))
         print(connected_peers)
     else:
         print('%s has connected')
         peer = connected_peers[name]
         peer.sid = request.sid
-        peer.emit('greeting', 'Welcome to the Galaxy %s.' % peer.name)
+        peer.emit('greeting', 'Welcome to the galaxy, %s' % peer.name)
+        peer.emit('request_offer', {
+            'available_peers': connected_peers.keys()
+        })
         print('%s peers connected' % len(connected_peers.keys()))
         print(connected_peers)
 
-    # select 'mentor' for peer, and send request an offer to peer for mentor
-    try:
-        other_peer = random.choice(
-                list(set(connected_peers.keys()) - set(peer.name)))
-        peer.emit('request offer', {
-            'callee': other_peer
-        })
-    except IndexError:
-        print("no other peer to connect to :(")
+    broadcast('peer connected', {'peer': peer.name})
 
 
 if __name__ == '__main__':
