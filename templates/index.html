@@ -25,9 +25,11 @@
             var RTCPeerConnection = window.webkitRTCPeerConnection;
             var RTCIceCandidate = window.RTCIceCandidate;
 
-            var pcConfig = {'iceServers': [{'url': 'stun:stun.l.google.com:19302'}]};
-            var pcConstraints = {'optional': [{'DtlsSrtpKeyAgreement': true}]};
+            var pc_config = {'iceServers': [{'url': 'stun:stun.l.google.com:19302'}]};
+            var pc_constraints = {'optional': [{'DtlsSrtpKeyAgreement': true}]};
             
+            var pc_send, pc_recieve;  // RTCPeerConnections
+            var send_channel, receive_channel;  // RTCDataChannel
 
             // DOM elements
             var input = document.getElementById('input');
@@ -40,9 +42,9 @@
 
             // session details
             // username is stored in sessionStorage
-            var availablePeers = [];
-            var mentorName = null;
-
+            var available_peers = [];
+            var user_name;
+            var peer_name; 
 
             // syntactic sugar for array membership
             Array.prototype.includes = function(value){
@@ -57,36 +59,128 @@
              * Add message to user output.
              * @param msg: string, text message to peer
              */
-            function addmessage(msg) {
+            function add_message(msg) {
                 output.insertAdjacentHTML('afterbegin', "<p><span>" + msg + "</span></p>");
             }
+
 
             /*
              * Add user to user list.
              * @param user: string, username of user
              */
-            function adduser(user) {
-                console.log("Available peers: ", availablePeers);
-                if (!availablePeers.includes(user)){
+            function add_user(user) {
+                console.log("Available peers: ", available_peers);
+                if (!available_peers.includes(user)){
                     console.log("Adding user to user list", user);
-                    availablePeers.push(user);
+                    available_peers.push(user);
                     userlist.add(new Option(user));
                 }
             }
+
 
             /*
              * Remove user from user list.
              * @param user: string, username of user
              */
-            function removeuser(user){
-                for (var i=0; i <= availablePeers.length; i++)
-                    if (userlist[i].text == user){
+            function remove_user(user){
+                for (var i=0; i <= available_peers.length; i++)
+                    if (userlist[i].text == user)
                         userlist.remove(i)
-                        var index = availablePeers.indexOf(user);
-                        availablePeers.splice(index, 1);
-                        console.log("Available peers: ", availablePeers);
-                    }
+
+                var index = available_peers.indexOf(user);
+                available_peers.splice(index, 1);
+                console.log("Available peers: ", available_peers);
             }
+            
+
+            /*
+             * Set local session description and send the offer.
+             * @param: desc, local session description
+             */
+            function setlocalsdp_createoffer(desc){
+                console.log("Attempting to se local description.");
+                pc_send.setLocalDescription(desc);
+            }
+
+
+            /* error creating offer */
+            function createoffer_error(event){
+                console.log('Error calling createOffer(...)', event.message);
+            }
+
+
+            /*
+             * Handling ICE candidates for send channel.
+             * @param: event
+             */
+            function send_handleicecandidate(event){
+                console.log('send_handleicecandidate: event');
+                if (event.candidate){
+                    var candidate = event.candidate;
+                    var message = {
+                        is_sender: "true",
+                        destination: peer_name,
+                        sdpMid: candidate.sdpMid,
+                        sdpMLineIndex: candidate.sdpMLineIndex,
+                        candidate: candidate.candidate
+                    }
+                    socket.emit('ice candidate', message);
+                } else {
+                    console.log("End of ICE candidates.");
+                }
+            }
+
+            /*
+             * caller setup communication channel with callee peer.
+             * creates a new RTCPeerConnection object as well as the initial offer.
+             * @param: (string) peer_name, name of peer to chat with
+             */
+            function start_sending_communication(peer_name){
+                peer_name = peer_name;
+                console.log("Attempting to setup peer communication with", peer_name);
+
+                if (pc_send != null){
+                    send_channel.close();
+                    pc_send.close();
+                    pc_send = null;
+                }
+
+                try{
+                    pc_send = new RTCPeerConnection(null, {optional: []});
+                    pc_send.onicecandidate = send_handleicecandidate;
+                    try {
+                        send_channel = pc_send.createDataChannel('sendchannel', {reliable: false});
+                    } catch(e) {
+                        console.log('Unable to create data channel.');
+                        console.log('Send channel creation failed with exception:', e);
+                        return;
+                    }
+                    console.log('created data channel');
+                } catch(e) {
+                    alert('Unable to create RTCPeerConnection.');
+                    console.log('Peer creation failed with exception:', e.message);
+                    return;
+                }
+
+                console.log('Successfully created send channel.');
+                pc_send.createOffer().then(
+                    // if successful, set the local description
+                    setlocalsdp_createoffer
+                ).then(function(){
+                    // afterwards, send offer to signaling server
+                    console.log('Sending offer to signaling server.'); 
+                    var message = {
+                        source: user_name,
+                        destination: peer_name,
+                        sdp: pc_send.localDescription
+                    };
+                    socket.emit('offer', message);
+                }).catch(function(e){
+                    console.log('Failed to create offer with error: ', e);
+                });
+             
+            }
+
 
             /*
              * connection/disconnection handlers
@@ -107,12 +201,13 @@
                 if (window.sessionStorage['token'] == undefined) {
                     var token = message.token;
                     window.sessionStorage.setItem('token', token);
+                    user_name = token;
                     socket.emit('session', {
                         'token': message.token
                     });
-                } else {
-                    // if there is a name, tell server
+                } else { 
                     var token = window.sessionStorage['token'];
+                    user_name = token;
                     socket.emit('session', {
                         'token': token
                     });                   
@@ -124,27 +219,31 @@
              * handler for inital greeting message from server
              */
             socket.on('greeting', function(message){ 
-                addmessage(message);
+                add_message(message);
             });
+
 
             socket.on('request offer', function(request){
                 console.log("Received request offer:", request.available_peers);
-                var available_peers = request.available_peers;
-                for (var i = 0; i <= available_peers.length; i++)
-                    adduser(available_peers[i]);
+                var peers = request.available_peers;
+                for (var i = 0; i <= peers.length; i++)
+                    add_user(peers[i]);
  
             });
 
+
             socket.on('peer connected', function(message){
                 console.log("New peer connected:", message);
-                adduser(message.peer);
+                add_user(message.peer);
             });
+
 
             socket.on('peer disconnected', function(message){
                 console.log("Peer disconnected:", message); 
-                removeuser(message.peer);
+                remove_user(message.peer);
             });
-            
+
+
             window.beforeunload = function(){
                  socket.close();
             };
@@ -152,11 +251,16 @@
 
             input.onkeypress = function(e) {
 		       if (e.keyCode == 13) {
-                   var message = {};
-                   message.payload = input.value;
-                   console.log('Sending message', message);
-                   socket.emit('message', JSON.stringify(message));
-                   return false;
+                   var selected_user = userlist.selectedIndex;
+                   if (selected_user != -1){
+                       // create offer for selected user
+                       peer_name = userlist[selected_user].text;
+                       start_sending_communication(peer_name);
+ 
+                       return false;
+                   } else {
+                       alert('Select a peer to connect with.');
+                   }
                }
             };
         });
