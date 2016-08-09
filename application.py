@@ -38,6 +38,7 @@ def broadcast(event, data):
     """Broadcast message event with data to each connected peer."""
     for peer in connected_peers.values():
         peer.emit(event, data)
+    return
 
 
 @app.route('/')
@@ -49,6 +50,7 @@ def index():
 def connect_handler():
     name = 'planet_%d' % random.randint(0, 42)
     emit('session', {'token': name})
+    return
 
 
 @socketio.on('disconnect')
@@ -62,6 +64,7 @@ def disconnect_handler():
         print('%d peers connected' % len(connected_peers.keys()))
         print(connected_peers)
         broadcast('peer disconnected', {'peer': peer.name})
+    return
 
 
 @socketio.on('session')
@@ -75,7 +78,7 @@ def session_handler(message):
         connected_peers[peer.name] = peer
 
         peer.emit('greeting', 'Welcome to the Galaxy %s.' % peer.name)
-        peer.emit('request offer', {
+        peer.emit('available peers', {
             'available_peers': connected_peers.keys()
         })
 
@@ -87,7 +90,7 @@ def session_handler(message):
         peer.sid = request.sid
 
         peer.emit('greeting', 'Welcome to the galaxy, %s' % peer.name)
-        peer.emit('request_offer', {
+        peer.emit('available peers', {
             'available_peers': connected_peers.keys()
         })
 
@@ -95,22 +98,24 @@ def session_handler(message):
         print(connected_peers)
 
     broadcast('peer connected', {'peer': peer.name})
-    # end
+    return
 
 
 @socketio.on('offer')
 def handle_offer(offer):
-    """ Recieves offer from caller.
+    """ Route offer from caller peer to callee peer
     """
     print("Received offer: %s" % offer)
-    src = offer['source']
-    dst = offer['destination']
-    if dst not in connected_peers.keys():
-        # emit back to the source that this peer does not actually exist
+    caller = offer['source']
+    callee = offer['destination']
+    if callee not in connected_peers.keys():
+        # TODO: tell caller that peer does not exist
         pass
     else:
-        peer = connected_peers[dst]
+        peer = connected_peers[callee]
         peer.emit('offer', offer)
+    return
+
 
 if __name__ == '__main__':
     socketio.run(app)

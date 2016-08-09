@@ -203,7 +203,7 @@
              * callee setup receiving channel with peer caller
              * @param: string, peer_name
              */
-            function start_recieving_communication(peer_name){
+            function start_receiving_communication(peer_name){
                 if (pc_receive != null){
                     receive_channel.close()
                     pc_receieve.close()
@@ -276,8 +276,8 @@
             });
 
 
-            socket.on('request offer', function(request){
-                console.log("Received request offer:", request.available_peers);
+            socket.on('available peers', function(request){
+                console.log("Received list of available peers:", request.available_peers);
                 var peers = request.available_peers;
                 for (var i = 0; i <= peers.length; i++)
                     add_user(peers[i]); 
