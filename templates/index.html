@@ -98,12 +98,25 @@
              * @param: desc, local session description
              */
             function setlocalsdp_createoffer(desc){
-                console.log("Attempting to se local description.");
+                console.log("Attempting to set local description.");
                 pc_send.setLocalDescription(desc);
             }
 
 
-            /* error creating offer */
+            /*
+             * Set remote description and send the answer.
+             * @param: desc, remote sessions description
+             */
+            function setremotesdp_createanswer(desc){
+                console.log("Attempting to set the remote description.");
+                pc_recieve.setRemoteDescription(desc);
+            }
+
+
+            /*
+             * Error message when creating offer.
+             * @param: event, error that occured when creating offer
+             */
             function createoffer_error(event){
                 console.log('Error calling createOffer(...)', event.message);
             }
@@ -130,6 +143,11 @@
                 }
             }
 
+
+            function obtained_receive_channel() {
+                console.log("Obtained data channel for receiving data.");
+            }
+            
             /*
              * caller setup communication channel with callee peer.
              * creates a new RTCPeerConnection object as well as the initial offer.
@@ -161,7 +179,7 @@
                     console.log('Peer creation failed with exception:', e.message);
                     return;
                 }
-
+                // create offer and set local description
                 console.log('Successfully created send channel.');
                 pc_send.createOffer().then(
                     // if successful, set the local description
@@ -172,13 +190,48 @@
                     var message = {
                         source: user_name,
                         destination: peer_name,
-                        sdp: pc_send.localDescription
+                        jsep: pc_send.localDescription
                     };
                     socket.emit('offer', message);
                 }).catch(function(e){
                     console.log('Failed to create offer with error: ', e);
                 });
              
+            }
+
+            /*
+             * callee setup receiving channel with peer caller
+             * @param: string, peer_name
+             */
+            function start_recieving_communication(peer_name){
+                if (pc_receive != null){
+                    receive_channel.close()
+                    pc_receieve.close()
+                    pc_receive = null;
+                }
+
+                try {
+                    pc_receive = new RTCPeerConnection(null, {optional: []});
+                    pc_receive.ondatachannel = obtained_recieve_channel;
+                    pc_receive.onicecandidate = receive_handleicecandidate; 
+                } catch(e) {
+                    console.log("Unable to create pc_receive");
+                }
+                // create answer and set the remote description
+                console.log("Successfully created pc_receve");
+                pc_recieve.createAnswer().then(
+                    setremotesdp_createanwer
+                ).then(function(){
+                    console.log("Sending answer to signaling server.");
+                    var message = {
+                       source: user_name,
+                       destination: peer_name,
+                       jsep: pc_recieve  
+                    }
+                    socket.emit('answer', message);
+                }).catch(function(e){
+                    console.log("Failed to create answer.");
+                });
             }
 
 
@@ -227,8 +280,7 @@
                 console.log("Received request offer:", request.available_peers);
                 var peers = request.available_peers;
                 for (var i = 0; i <= peers.length; i++)
-                    add_user(peers[i]);
- 
+                    add_user(peers[i]); 
             });
 
 
@@ -243,7 +295,21 @@
                 remove_user(message.peer);
             });
 
+            /*
+             * Handler for recieving offers from caller.
+             */
+            socket.on('offer', function(offer){
+                 // check to-whom this offer is for, and route it to them
+                 console.log("Received offer from", offer.source);
+            });
 
+
+            /*
+             * Handler for recieving answers from callee.
+             */
+            socket.on('answer', function(answer){
+            });
+            
             window.beforeunload = function(){
                  socket.close();
             };

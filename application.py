@@ -14,6 +14,7 @@ from flask_socketio import SocketIO, send, emit
 app = Flask(__name__)
 socketio = SocketIO(app)
 
+# { peer_name: PeerConnection }
 connected_peers = {}
 
 class PeerConnection:
@@ -67,31 +68,49 @@ def disconnect_handler():
 def session_handler(message):
     peer = None
     name = message['token']
+    print('%s has connected' % name)
+
     if name not in connected_peers.keys():
-        print('%s has connected' % name)
         peer = PeerConnection(sid=request.sid, name=name)
         connected_peers[peer.name] = peer
+
         peer.emit('greeting', 'Welcome to the Galaxy %s.' % peer.name)
-        # send list of known peers along with request offer
         peer.emit('request offer', {
             'available_peers': connected_peers.keys()
         })
 
         print('%s peers connected' % len(connected_peers.keys()))
         print(connected_peers)
+
     else:
-        print('%s has connected')
         peer = connected_peers[name]
         peer.sid = request.sid
+
         peer.emit('greeting', 'Welcome to the galaxy, %s' % peer.name)
         peer.emit('request_offer', {
             'available_peers': connected_peers.keys()
         })
+
         print('%s peers connected' % len(connected_peers.keys()))
         print(connected_peers)
 
     broadcast('peer connected', {'peer': peer.name})
+    # end
 
+
+@socketio.on('offer')
+def handle_offer(offer):
+    """ Recieves offer from caller.
+    """
+    print("Received offer: %s" % offer)
+    src = offer['source']
+    dst = offer['destination']
+    if dst not in connected_peers.keys():
+        # emit back to the source that this peer does not actually exist
+        pass
+    else:
+        peer = connected_peers[dst]
+        peer.emit('offer', offer)
 
 if __name__ == '__main__':
     socketio.run(app)
