@@ -28,7 +28,7 @@
             var pc_config = {'iceServers': [{'url': 'stun:stun.l.google.com:19302'}]};
             var pc_constraints = {'optional': [{'DtlsSrtpKeyAgreement': true}]};
             
-            var pc_send, pc_recieve;  // RTCPeerConnections
+            var pc_send, pc_receive;  // RTCPeerConnection
             var send_channel, receive_channel;  // RTCDataChannel
 
             // DOM elements
@@ -107,9 +107,9 @@
              * Set remote description and send the answer.
              * @param: desc, remote sessions description
              */
-            function setremotesdp_createanswer(desc){
+            function setlocalsdp_createanswer(desc){
                 console.log("Attempting to set the remote description.");
-                pc_recieve.setRemoteDescription(desc);
+                pc_receive.setLocalDescription(desc);
             }
 
 
@@ -192,24 +192,25 @@
                         destination: peer_name,
                         jsep: pc_send.localDescription
                     };
-                    socket.emit('offer', message);
+                    socket.emit('jsep', message);
                 }).catch(function(e){
                     console.log('Failed to create offer with error: ', e);
                 });
-             
+ 
             }
 
             /*
              * callee setup receiving channel with peer caller
-             * @param: string, peer_name
+             * @param: peer_name (string), name of caller who sent offer
+             * @param: desc (JSON), session description of remote caller
              */
-            function start_receiving_communication(peer_name){
+            function start_receiving_communication(peer_name, desc){
                 if (pc_receive != null){
-                    receive_channel.close()
-                    pc_receieve.close()
+                    receive_channel.close(); 
+                    pc_receive.close()
                     pc_receive = null;
                 }
-
+                console.log("Attempting to create recieving channel.");
                 try {
                     pc_receive = new RTCPeerConnection(null, {optional: []});
                     pc_receive.ondatachannel = obtained_recieve_channel;
@@ -218,19 +219,20 @@
                     console.log("Unable to create pc_receive");
                 }
                 // create answer and set the remote description
-                console.log("Successfully created pc_receve");
-                pc_recieve.createAnswer().then(
-                    setremotesdp_createanwer
+                console.log("Successfully created pc_receive");
+                pc_receive.setRemoteDescription(desc);
+                pc_receive.createAnswer().then(
+                    setlocalsdp_createanswer
                 ).then(function(){
                     console.log("Sending answer to signaling server.");
                     var message = {
                        source: user_name,
                        destination: peer_name,
-                       jsep: pc_recieve  
+                       jsep: pc_receive.localDescription
                     }
-                    socket.emit('answer', message);
+                    socket.emit('jsep', message);
                 }).catch(function(e){
-                    console.log("Failed to create answer.");
+                    console.log("Failed to create answer with", e);
                 });
             }
 
@@ -276,6 +278,9 @@
             });
 
 
+            /*
+             * Signaling server sending list of available peers upon inital connection to server.  
+             */
             socket.on('available peers', function(request){
                 console.log("Received list of available peers:", request.available_peers);
                 var peers = request.available_peers;
@@ -283,17 +288,31 @@
                     add_user(peers[i]); 
             });
 
-
+            /*
+             * Handler notifying when other peers connect to signaling server.
+             */
             socket.on('peer connected', function(message){
-                console.log("New peer connected:", message);
+                console.log("New peer connected:", message.peer);
                 add_user(message.peer);
             });
 
 
+            /*
+             * Handler notifying when other peers disconnect from signaling server.
+             */
             socket.on('peer disconnected', function(message){
                 console.log("Peer disconnected:", message); 
                 remove_user(message.peer);
             });
+
+            
+            /*
+             * Handler for various errors detected by signaling server.
+             */
+            socket.on('error', function(error){
+                console.log('ERROR:', error.message); 
+            });
+
 
             /*
              * Handler for recieving offers from caller.
@@ -301,6 +320,8 @@
             socket.on('offer', function(offer){
                  // check to-whom this offer is for, and route it to them
                  console.log("Received offer from", offer.source);
+                 console.log("With SDP:", offer.jsep);
+                 start_receiving_communication(offer.source, offer.jsep);
             });
 
 
@@ -308,6 +329,7 @@
              * Handler for recieving answers from callee.
              */
             socket.on('answer', function(answer){
+                console.log("Received an answer from", answer.source);
             });
             
             window.beforeunload = function(){

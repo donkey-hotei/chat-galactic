@@ -101,19 +101,24 @@ def session_handler(message):
     return
 
 
-@socketio.on('offer')
-def handle_offer(offer):
-    """ Route offer from caller peer to callee peer
+@socketio.on('jsep')
+def handle_jsep(jsep):
+    """ Route offers/answers from caller peer to callee peer and vice versa
     """
-    print("Received offer: %s" % offer)
-    caller = offer['source']
-    callee = offer['destination']
-    if callee not in connected_peers.keys():
-        # TODO: tell caller that peer does not exist
-        pass
+    jsep_type = jsep['jsep']['type']
+    src = jsep['source']
+    dst = jsep['destination']
+    print("Received an %s from %s to %s." % (jsep_type, src, dst))
+    if dst not in connected_peers.keys():
+        peer.emit('error', {'message': 'Peer does not exist.'})
     else:
-        peer = connected_peers[callee]
-        peer.emit('offer', offer)
+        peer = connected_peers[dst]
+        if jsep_type == 'offer':
+            print("Routing offer to %s." % dst)
+            peer.emit('offer', jsep)
+        elif jsep_type == 'answer':
+            print("Routing answer to %s." % dst)
+            peer.emit('answer', jsep)
     return
 
 
