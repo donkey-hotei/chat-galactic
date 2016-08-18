@@ -84,8 +84,9 @@
              */
             function remove_user(user){
                 for (var i=0; i <= available_peers.length; i++)
-                    if (userlist[i].text == user)
-                        userlist.remove(i)
+                    if (userlist[i] !== undefined)
+                        if (userlist[i].text == user)
+                            userlist.remove(i)
 
                 var index = available_peers.indexOf(user);
                 available_peers.splice(index, 1);
