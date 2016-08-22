@@ -8,7 +8,7 @@ To yank dependencies for the python signaling server, use pip:
 pip install flask flask_socketio eventlet
 ```
 
-For the client-side socket.io library, clone the project into `static` directory like so:
+For the client-side socket.io library, clone the project into the `static` directory like so:
 ```bash
 git clone https://github.com/socketio/socket.io-client static/js/socket.io
 ```
