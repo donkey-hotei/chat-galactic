@@ -34,6 +34,13 @@ window.addEventListener('load', function () {
         return false;
     }
 
+    /*
+     * Encodes apersands, left angle-brackets, and quotes to their html equivalents.
+     * @param: string
+     */
+    function sanitize_input(string) {
+        return string.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    }
 
     /*
      * Add message to user output.
@@ -41,7 +48,7 @@ window.addEventListener('load', function () {
      */
     function add_message(msg) {
         output.insertAdjacentHTML('afterbegin', 
-                        "<p><span>" + msg + "</span></p>");
+                        "<p><span>" + santize_input(msg) + "</span></p>");
     }
 
 
