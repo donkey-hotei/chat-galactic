@@ -2227,3 +2227,25 @@ In the future, we might start automatically compiling incompatible third-party m
 ## Something Missing?
 
 If you have ideas for more “How To” recipes that should be on this page, [let us know](https://github.com/facebookincubator/create-react-app/issues) or [contribute some!](https://github.com/facebookincubator/create-react-app/edit/master/packages/react-scripts/template/README.md)
+=======
+## chat-galactic: an experimental P2P chatroom application using WebRTC
+
+
+#### Installation
+
+To yank dependencies for the python signaling server, use pip:
+```bash
+pip install flask flask_socketio eventlet
+```
+
+For the client-side socket.io library, clone the project into the `static` directory like so:
+```bash
+git clone https://github.com/socketio/socket.io-client static/js/socket.io
+```
+#### Running the Signaling Server
+
+Simply run `python application.py` and visit localhost at port 5000.
+
+
+
+>>>>>>> 8f1f99f24d3affb65ff875791427604a749b7fb8
