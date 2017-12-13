@@ -1,9 +1,10 @@
 import React from 'react';
 import { render } from 'react-dom';
-import ChatBox from "./components/ChatBox"
+import ChatGalactic from './components/ChatGalactic';
+import subscribeToTimer from './api/client';
 import './index.css';
 
 render(
-    <ChatBox />,
+    <ChatGalactic />,
     document.getElementById('root')
 )

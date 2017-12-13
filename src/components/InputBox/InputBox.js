@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 
+import './InputBox.css';
+
 class InputBox extends Component {
     render() {
         return (
-            <input type="text" id="input"/>
+            <input type="text" className="inputbox" />
         );
     }
 }

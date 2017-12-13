@@ -1,0 +1,17 @@
+.status {
+    width: 88px;
+    display: block;
+    float: left;
+    margin-top: 15px;
+}
+
+.button {
+    width: 20px;
+    display: block;
+    float: right;
+    margin-top: 10px;
+}
+
+.black_flag:after {
+    content: "\1F3F4";
+}
