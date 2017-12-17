@@ -3,7 +3,7 @@ import { render } from 'react-dom';
 import ChatGalactic from './components/ChatGalactic';
 import './api/client';
 
-import './styles/base.scss';
+import './styles/base.css';
 
 render(
     <ChatGalactic />,

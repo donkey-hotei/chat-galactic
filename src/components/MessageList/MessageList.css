@@ -1,11 +1,16 @@
 .messagelist {
-    padding: 5px;
-    background: #ddd;
-    border-radius: 5px;
-    overflow-y: scroll;
-    border: 1px solid #CCC;
-    margin-top: 80px;
+    width: 510px;
     height: 160px;
 
-    display: flex;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+
+    padding: 5px;
+    background: #ddd;
+
+    margin-top: 80px;
+    margin-left: 5px;
+    overflow-y: scroll;
+
+    box-shadow: -1em 1em #000;
 }
