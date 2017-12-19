@@ -1,10 +1,9 @@
 import React from 'react';
 import { render } from 'react-dom';
-import ChatGalactic from './components/ChatGalactic';
-
+import Application from './components/Application';
 import './styles/base.css';
 
 render(
-    <ChatGalactic />,
+    <Application />,
     document.getElementById('root')
 )
