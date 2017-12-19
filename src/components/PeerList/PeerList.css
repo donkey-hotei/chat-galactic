@@ -2,13 +2,13 @@
     height: 160px;
     width: 150px;
 
-    border: 2px solid #CCC;
+    border: 2px solid #fff;
     border-radius: 5px;
     border-right: 2px dashed #CCC;
 
     padding: 5px;
     margin-top: 80px;
-    margin-right: 100px;
+    margin-right: 95px;
     overflow-y: scroll;
 }
 
