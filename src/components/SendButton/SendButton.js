@@ -1,12 +1,20 @@
 import React, { Component } from 'react';
-// import FontAwesome from 'react-fontawesome';
+import io from '../../lib/websocket';
 
 import './SendButton.css';
 
 class SendButton extends Component {
+
+    sendMessage() {
+        io.sendMessage(this.props.userInput);
+    }
+
     render() {
         return (
-            <button>Send</button>
+            <button
+              onClick={this.sendMessage.bind(this)}>
+                Send
+            </button>
         );
     }
 }
