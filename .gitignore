@@ -1,16 +1,16 @@
 # See https://help.github.com/ignore-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+node_modules
 
 # testing
-/coverage
+coverage
 
 # production
-/build
+build
 
 # misc
-/tmp
+tmp
 .DS_Store
 .env.local
 .env.development.local
@@ -24,3 +24,6 @@ yarn-error.log*
 # ignore compiled css
 src/**/*.css
 .tags*
+
+# ignore VIM swap files
+*.sw*
