@@ -4,19 +4,20 @@ import io from '../../lib/websocket';
 import './SendButton.css';
 
 class SendButton extends Component {
+  sendMessage() {
+    io.sendMessage(this.props.userInput);
+  }
 
-    sendMessage() {
-        io.sendMessage(this.props.userInput);
-    }
-
-    render() {
-        return (
-            <button
-              onClick={this.sendMessage.bind(this)}>
+  render() {
+    return (
+      <button
+        type="submit"
+        onClick={this.sendMessage.bind(this)}
+      >
                 Send
-            </button>
-        );
-    }
+      </button>
+    );
+  }
 }
 
 export default SendButton;

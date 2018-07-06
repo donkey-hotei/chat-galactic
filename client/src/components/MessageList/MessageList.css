@@ -1,6 +1,6 @@
 .messagelist {
     width: 510px;
-    height: 160px;
+    height: 250px;
 
     border: 2px solid #ccc;
     border-radius: 5px;
@@ -9,7 +9,8 @@
     background: #ddd;
 
     margin-top: 80px;
-    margin-left: 5px;
+    margin-left: 10px;
+    margin-right: 10px;
     overflow-y: scroll;
 
     box-shadow: -0.5em 0.5em #000;

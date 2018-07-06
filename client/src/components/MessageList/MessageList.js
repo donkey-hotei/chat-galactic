@@ -4,12 +4,11 @@ import React, { Component } from 'react';
 import './MessageList.css';
 
 class MessageList extends Component {
-    render () {
-        return (
-            <div className="messagelist">
-            </div>
-        )
-    }
+  render() {
+    return (
+      <div className="messagelist" />
+    );
+  }
 }
 
 export default MessageList;

@@ -1,0 +1,13 @@
+button {
+    border-radius: 4px;
+    height: 40px;
+    width: 180px;
+    display: inline-block;
+    margin-top: 20px;
+    margin-right: 80px
+}
+
+button:hover {
+    background-color: lightblue;
+    color: white
+}
