@@ -15,6 +15,7 @@ class Websocket {
       attempts: params.attempts || 1,
     };
     this.setupWebsocket();
+    this.generateInterval = this.generateInterval.bind(this);
   }
 
   setupWebsocket(params = defaultParams) {

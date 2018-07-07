@@ -1,13 +1,9 @@
-import React, { Component } from 'react';
-
+import React from 'react';
 import './PeerList.css';
 
-class PeerList extends Component {
-  render() {
-    return (
-      <div className="peerlist" />
-    );
-  }
-}
+const PeerList = () => (
+  <div className="peerlist" />
+);
+
 
 export default PeerList;

@@ -1,22 +1,19 @@
 import React from 'react';
 
-const Header = () => {
-  return (
-    <header className="header">
-      <main>
-        <div className="logo">
-          <h1>
-            ch
-            <span className="flip">
-              λ
-            </span>
-            t galactic
-          </h1>
-        </div>
-      </main>
-    </header>
-  );
-};
-
+const Header = () => (
+  <header className="header">
+    <main>
+      <div className="logo">
+        <h1>
+          ch
+          <span className="flip">
+            λ
+          </span>
+          t galactic
+        </h1>
+      </div>
+    </main>
+  </header>
+);
 
 export default Header;
