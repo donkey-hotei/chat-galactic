@@ -6,9 +6,9 @@ const Message = ({ message }) => (
   <div className="message">
     <strong>
       {message.username}
-      :
-      {message.content}
     </strong>
+    :
+    {message.content}
   </div>
 );
 
