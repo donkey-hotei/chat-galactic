@@ -10,35 +10,49 @@ class Application extends Component {
     super(props);
 
     this.state = {
-      conversation: [
+      peers: [
         {
           id: 0,
           username: 'Arthur Dent',
-          content: '  Hello World.',
         },
         {
           id: 1,
           username: 'Stephen Hawking',
-          content: '  Beautiful!',
         },
         {
           id: 2,
           username: 'Buckaroo Banzai',
-          content: '  What the fuck?',
+        },
+      ],
+      conversation: [
+        {
+          id: 0,
+          username: 'Arthur Dent',
+          content: '  Welcome to the Galaxy...',
+        },
+        {
+          id: 1,
+          username: 'Stephen Hawking',
+          content: '  a^2 + b^2 == c^2 !',
+        },
+        {
+          id: 2,
+          username: 'Buckaroo Banzai',
+          content: '  Have you guys seen my overthrustor anywhere?',
         },
       ],
     };
   }
 
   render() {
-    const { conversation } = this.state;
+    const { peers, conversation } = this.state;
 
     return (
       <div className="chat-container">
         <Header />
         <div className="view-container">
           <Conversation conversation={conversation} />
-          <PeerList />
+          <PeerList peers={peers} />
         </div>
 
         <form className="input-container" onSubmit={() => 'test'}>

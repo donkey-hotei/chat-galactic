@@ -1,0 +1,20 @@
+.peer-entry {
+    padding: 6px;
+
+    font-size: 10px;
+    text-align: right;
+}
+
+.peer-entry:hover {
+    background-color: #e1b3ef
+}
+
+/*
+li {
+    background: #e1b3ff;
+}
+
+li:nth-child(even) {
+    background:  #47acff;
+}
+*/

@@ -1,10 +1,11 @@
-.peerlist {
+.peer-list {
     height: 250px;
     width: 170px;
 
     border: 2px solid #fff;
     border-radius: 5px;
     border-right: 2px dashed #CCC;
+    background: #A5A5FF;
 
     padding: 5px;
     margin-top: 80px;
@@ -12,5 +13,9 @@
     overflow-y: scroll;
 
     box-shadow: -0.5em 0.5em #000;
+}
+
+ul {
+    list-style-type: none;
 }
 
