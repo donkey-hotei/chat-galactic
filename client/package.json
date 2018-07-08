@@ -12,7 +12,7 @@
     "react-fontawesome": "^1.6.1",
     "react-redux": "^5.0.7",
     "react-router": "^4.3.1",
-    "react-scripts": "1.0.17",
+    "react-scripts": "^1.1.4",
     "scss": "^0.2.4",
     "webpack": "^3.12.0"
   },
