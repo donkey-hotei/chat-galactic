@@ -1,9 +1,10 @@
 import React from 'react';
+import './Header.css';
 
 const Header = () => (
   <header className="header">
     <main>
-      <div className="logo">
+      <div className="logo rainbow">
         <h1>
           ch
           <span className="flip">
