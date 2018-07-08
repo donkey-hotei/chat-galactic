@@ -13,7 +13,11 @@ const Message = ({ message }) => (
 );
 
 Message.propTypes = {
-  message: PropTypes.objectOf(PropTypes.string).isRequired,
+  message: PropTypes.shape({
+    id: PropTypes.number,
+    username: PropTypes.string,
+    content: PropTypes.string,
+  }).isRequired,
 };
 
 export default Message;

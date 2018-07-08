@@ -7,7 +7,7 @@ const PeerList = ({ peers }) => (
   <div className="peer-list">
     <ul>
       {
-        peers.map(peer => (<PeerEntry peer={peer} />))
+        peers.map(peer => (<PeerEntry key={peer.id} peer={peer} />))
       }
     </ul>
   </div>

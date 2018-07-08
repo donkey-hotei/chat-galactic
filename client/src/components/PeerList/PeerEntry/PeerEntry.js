@@ -12,6 +12,7 @@ const PeerEntry = ({ peer }) => (
 
 PeerEntry.propTypes = {
   peer: PropTypes.shape({
+    id: PropTypes.number,
     username: PropTypes.string,
   }).isRequired,
 };
