@@ -1,7 +1,7 @@
 import React from 'react';
 import './PeerList.css';
 
-const PeerList = () => (
+const PeerList = peers => (
   <div className="peerlist" />
 );
 

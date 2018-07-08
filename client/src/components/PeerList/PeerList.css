@@ -10,5 +10,7 @@
     margin-top: 80px;
     margin-right: 95px;
     overflow-y: scroll;
+
+    box-shadow: -0.5em 0.5em #000;
 }
 

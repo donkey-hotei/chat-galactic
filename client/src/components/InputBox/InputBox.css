@@ -1,5 +1,5 @@
 .inputbox {
-    width: 500px;
+    width: 510px;
     height: 27px;
     background: #ccf;
 
@@ -10,4 +10,6 @@
     margin-top: 20px;
     margin-left: 0px;
     margin-right: 10px;
+    box-shadow: -0.5em 0.5em #000;
+
 }
