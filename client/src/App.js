@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import Conversation from './components/Conversation';
 import PeerList from './components/PeerList';
-import InputBox from './components/InputBox';
-import SendButton from './components/SendButton';
+import MessageForm from './components/MessageForm';
 import Header from './components/Header';
 
 class Application extends Component {
@@ -55,10 +54,7 @@ class Application extends Component {
           <PeerList peers={peers} />
         </div>
 
-        <form className="input-container" onSubmit={() => 'test'}>
-          <InputBox />
-          <SendButton />
-        </form>
+        <MessageForm />
       </div>
     );
   }
