@@ -35,7 +35,5 @@ func main() {
         serveWs(hub, w, r)
     })
     err := http.ListenAndServe(*addr, nil)
-    if err != nil {
-        log.Fatal("ListenAnd :wqa
-    }
+    // TODO
 }
