@@ -12,12 +12,19 @@ class Application extends Component {
     this.state = {
       conversation: [
         {
+          id: 0,
           username: 'Arthur Dent',
-          content: '<p>Hello World.</p>',
+          content: '  Hello World.',
         },
         {
+          id: 1,
           username: 'Stephen Hawking',
-          content: '<p>Beautiful!</p>',
+          content: '  Beautiful!',
+        },
+        {
+          id: 2,
+          username: 'Buckaroo Banzai',
+          content: '  What the fuck?',
         },
       ],
     };
@@ -34,7 +41,7 @@ class Application extends Component {
           <PeerList />
         </div>
 
-        <form className="input-container">
+        <form className="input-container" onSubmit={() => 'test'}>
           <InputBox />
           <SendButton />
         </form>
