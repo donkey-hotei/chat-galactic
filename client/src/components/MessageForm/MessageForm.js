@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import './MessageForm.css';
 
 class MessageForm extends Component {
@@ -21,8 +22,14 @@ class MessageForm extends Component {
 
   handleSubmit(event) {
     const { value } = this.state;
+    const { parentCallback } = this.props;
 
-    console.log(value);
+    this.setState({ value: '' });
+    parentCallback({
+      id: 4,
+      username: 'Arthur Dent',
+      content: value,
+    });
 
     event.preventDefault();
   }
@@ -45,5 +52,9 @@ class MessageForm extends Component {
     );
   }
 }
+
+MessageForm.propTypes = {
+  parentCallback: PropTypes.func.isRequired,
+};
 
 export default MessageForm;

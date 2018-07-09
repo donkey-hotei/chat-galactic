@@ -41,6 +41,15 @@ class Application extends Component {
         },
       ],
     };
+
+    this.updateConversation = this.updateConversation.bind(this);
+  }
+
+  updateConversation(message) {
+    const { conversation } = this.state;
+
+    conversation.push(message);
+    this.setState({ conversation });
   }
 
   render() {
@@ -54,7 +63,7 @@ class Application extends Component {
           <PeerList peers={peers} />
         </div>
 
-        <MessageForm />
+        <MessageForm parentCallback={this.updateConversation} />
       </div>
     );
   }
