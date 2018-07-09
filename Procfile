@@ -1,2 +1,2 @@
-server: PORT=3001 go run server/*.go
+server: go run server/*.go --addr=":3001"
 client: PORT=3000 yarn --cwd client start
