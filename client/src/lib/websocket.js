@@ -1,6 +1,6 @@
 
 const defaultParams = {
-  url: 'ws://5c61f78e.ngrok.io',
+  url: 'ws://localhost:3000/ws',
   debug: true,
   shouldReconnect: true,
 };
@@ -15,7 +15,6 @@ class Websocket {
       attempts: params.attempts || 1,
     };
     this.setupWebsocket();
-    this.generateInterval = this.generateInterval.bind(this);
   }
 
   setupWebsocket(params = defaultParams) {
@@ -44,7 +43,8 @@ class Websocket {
       this.logging('Websocket disconnected.');
 
       if (params.shouldReconnect) {
-        const interval = this.generateInterval(this.state.attempts);
+        const { attempts } = this.state;
+        const interval = Math.min(30, 1000 * (2 ** (attempts - 1)));
 
         this.timeoutId = setTimeout(() => {
           this.state.attempts += 1;
@@ -56,10 +56,6 @@ class Websocket {
 
   dispatch(message) {
     this.logging(`Received Message: ${JSON.stringify(message)}`);
-  }
-
-  generateInterval(k) {
-    return Math.min(30, 1000 * (2 ** (k - 1)));
   }
 
   logging(logline) {

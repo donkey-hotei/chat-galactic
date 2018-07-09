@@ -4,7 +4,7 @@ import './Header.css';
 const Header = () => (
   <header className="header">
     <main>
-      <div className="logo rainbow">
+      <div className="logo">
         <h1>
           ch
           <span className="flip">
