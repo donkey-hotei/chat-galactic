@@ -3,6 +3,7 @@ import Conversation from './components/Conversation';
 import PeerList from './components/PeerList';
 import MessageForm from './components/MessageForm';
 import Header from './components/Header';
+import io from './lib/websocket';
 
 class Application extends Component {
   constructor(props) {
@@ -48,6 +49,10 @@ class Application extends Component {
   updateConversation(message) {
     const { conversation } = this.state;
 
+    if (message.content === '') {
+      return;
+    }
+    io.sendMessage(message);
     conversation.push(message);
     this.setState({ conversation });
   }

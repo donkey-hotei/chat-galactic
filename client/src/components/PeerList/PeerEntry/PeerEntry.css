@@ -6,7 +6,8 @@
 }
 
 .peer-entry:hover {
-    background-color: #e1b3ef
+    background-color: #e1b3ef;
+    box-shadow: 0.4em 0.4em #000;
 }
 
 /*
