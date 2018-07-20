@@ -4,6 +4,8 @@
 
 package main
 
+import "fmt"
+
 // Hub maintains the set of active clients and broadcasts messages to the
 // clients.
 type Hub struct {
@@ -29,25 +31,37 @@ func newHub() *Hub {
 	}
 }
 
+func (h *Hub) broadcastToClients(message []byte) {
+	for client := range h.clients {
+		select {
+		case client.send <- message:
+		default:
+			close(client.send)
+			delete(h.clients, client)
+		}
+	}
+}
+
+type Message struct {
+	event string
+	value string
+}
+
 func (h *Hub) run() {
 	for {
 		select {
 		case client := <-h.register:
+			fmt.Printf("[+] New client registered.\n")
 			h.clients[client] = true
 		case client := <-h.unregister:
+			fmt.Printf("[+] Client unregistered.\n")
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
 				close(client.send)
 			}
 		case message := <-h.broadcast:
-			for client := range h.clients {
-				select {
-				case client.send <- message:
-				default:
-					close(client.send)
-					delete(h.clients, client)
-				}
-			}
+			fmt.Printf("[+] Broadcasting message: %s\n", message)
+			h.broadcastToClients(message)
 		}
 	}
 }
