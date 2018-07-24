@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import './MessageForm.css';
 
-class MessageForm extends Component {
+export default class MessageForm extends Component {
   constructor(props) {
     super(props);
 
@@ -56,5 +56,3 @@ class MessageForm extends Component {
 MessageForm.propTypes = {
   parentCallback: PropTypes.func.isRequired,
 };
-
-export default MessageForm;

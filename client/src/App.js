@@ -3,58 +3,43 @@ import Conversation from './components/Conversation';
 import PeerList from './components/PeerList';
 import MessageForm from './components/MessageForm';
 import Header from './components/Header';
-import io from './lib/websocket';
 
-class Application extends Component {
+export default class Application extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      peers: [
-        {
-          id: 0,
-          username: 'Arthur Dent',
-        },
-        {
-          id: 1,
-          username: 'Stephen Hawking',
-        },
-        {
-          id: 2,
-          username: 'Buckaroo Banzai',
-        },
-      ],
-      conversation: [
-        {
-          id: 0,
-          username: 'Arthur Dent',
-          content: '  Welcome to the Galaxy...',
-        },
-        {
-          id: 1,
-          username: 'Stephen Hawking',
-          content: '  a^2 + b^2 == c^2 !',
-        },
-        {
-          id: 2,
-          username: 'Buckaroo Banzai',
-          content: '  Have you guys seen my overthrustor anywhere?',
-        },
-      ],
+      peers: [],
+      conversation: [],
     };
 
     this.updateConversation = this.updateConversation.bind(this);
   }
 
-  updateConversation(message) {
-    const { conversation } = this.state;
+  componentDidMount() {
+    const websocket = new WebSocket('ws://localhost:3001/ws');
 
-    if (message.content === '') {
-      return;
+    websocket.onmessage = (message) => {
+      const { conversation } = this.state;
+      try {
+        conversation.push(JSON.parse(message.data));
+        this.setState({ conversation });
+      } catch (error) {
+        console.error('Failed to parse message.');
+      }
+    };
+
+    this.setState({ websocket });
+  }
+
+  updateConversation(message) {
+    const { websocket } = this.state;
+    if (message.content === '') return;
+    try {
+      websocket.send(JSON.stringify(message));
+    } catch (error) {
+      console.error('Failed to send message.');
     }
-    io.sendMessage(message);
-    conversation.push(message);
-    this.setState({ conversation });
   }
 
   render() {
@@ -73,5 +58,3 @@ class Application extends Component {
     );
   }
 }
-
-export default Application;
