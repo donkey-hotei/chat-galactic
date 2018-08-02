@@ -5,44 +5,32 @@ import './MessageForm.css';
 export default class MessageForm extends Component {
   constructor(props) {
     super(props);
-
-    this.state = {
-      value: '',
-    };
-
+    this.state = { message: '' };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
   }
 
-  handleChange(event) {
-    this.setState({
-      value: event.target.value,
-    });
+  handleChange(e) {
+    const { value } = e.target;
+    this.setState({ message: value });
   }
 
-  handleSubmit(event) {
-    const { value } = this.state;
-    const { parentCallback } = this.props;
-
-    this.setState({ value: '' });
-    parentCallback({
-      id: 4,
-      username: 'Arthur Dent',
-      content: value,
-    });
-
-    event.preventDefault();
+  handleSubmit(e) {
+    e.preventDefault();
+    const { message } = this.state;
+    const { updateConversation } = this.props;
+    this.setState({ message: '' });
+    updateConversation({ message });
   }
 
   render() {
-    const { value } = this.state;
-
+    const { message } = this.state;
     return (
       <form className="input-container" onSubmit={this.handleSubmit}>
         <input
           type="text"
-          className="inputbox"
-          value={value}
+          className="messageform"
+          value={message}
           onChange={this.handleChange}
         />
         <button type="submit">
@@ -54,5 +42,5 @@ export default class MessageForm extends Component {
 }
 
 MessageForm.propTypes = {
-  parentCallback: PropTypes.func.isRequired,
+  updateConversation: PropTypes.func.isRequired,
 };

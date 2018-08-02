@@ -5,10 +5,10 @@ import './Message.css';
 const Message = ({ message }) => (
   <div className="message">
     <strong>
-      {message.username}
+      {message.name}
     </strong>
     :
-    {message.content}
+    {message.message}
   </div>
 );
 

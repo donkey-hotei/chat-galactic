@@ -4,46 +4,96 @@ import PeerList from './components/PeerList';
 import MessageForm from './components/MessageForm';
 import Header from './components/Header';
 
+const SIGNALING_SERVER = `ws://${window.location.hostname}:3001/ws`;
+
 export default class Application extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
+      uuid: '',
       peers: [],
       conversation: [],
+      onMessageCallbacks: {
+        register: (data) => {
+          const { uuid, name } = data;
+          this.setState({ uuid, name });
+        },
+        unregister: (data) => {
+          const { conversation } = this.state;
+          this.setState({
+            conversation: conversation.concat({
+              name: data.name,
+              message: ' has disconnected.',
+            }),
+          });
+        },
+        offer: (data) => {
+          console.log(data);
+        },
+        answer: (data) => {
+          console.log(data);
+        },
+        peers: (data) => {
+          const { peers } = data;
+          this.setState({ peers });
+        },
+        message: (data) => {
+          const { conversation } = this.state;
+          this.setState({
+            conversation: conversation.concat(data),
+          });
+        },
+      },
     };
-
     this.updateConversation = this.updateConversation.bind(this);
   }
 
   componentDidMount() {
-    const websocket = new WebSocket('ws://localhost:3001/ws');
-
-    websocket.onmessage = (message) => {
-      const { conversation } = this.state;
+    const { onMessageCallbacks } = this.state;
+    const websocket = new WebSocket(SIGNALING_SERVER);
+    websocket.onmessage = (e) => {
       try {
-        conversation.push(JSON.parse(message.data));
-        this.setState({ conversation });
-      } catch (error) {
-        console.error('Failed to parse message.');
+        const { uuid } = this.state;
+        const data = JSON.parse(e.data);
+        if (data.uuid === uuid) return;
+        if (onMessageCallbacks[data.type]) {
+          onMessageCallbacks[data.type](data);
+        }
+      } catch (err) {
+        console.error(err);
       }
     };
-
+    websocket.push = websocket.send;
+    websocket.send = (_data) => {
+      const { uuid, name } = this.state;
+      const data = _data;
+      data.uuid = uuid;
+      data.name = name;
+      data.type = 'message';
+      websocket.push(JSON.stringify(data));
+    };
     this.setState({ websocket });
   }
 
-  updateConversation(message) {
-    const { websocket } = this.state;
-    if (message.content === '') return;
+  updateConversation(data) {
+    const { websocket, conversation } = this.state;
+    if (data.message === '') return;
     try {
-      websocket.send(JSON.stringify(message));
-    } catch (error) {
-      console.error('Failed to send message.');
+      this.setState({
+        conversation: conversation.concat(data),
+      });
+      websocket.send(data);
+    } catch (err) {
+      console.error(err);
     }
   }
 
   render() {
-    const { peers, conversation } = this.state;
+    const {
+      uuid,
+      peers,
+      conversation,
+    } = this.state;
 
     return (
       <div className="chat-container">
@@ -52,8 +102,10 @@ export default class Application extends Component {
           <Conversation conversation={conversation} />
           <PeerList peers={peers} />
         </div>
-
-        <MessageForm parentCallback={this.updateConversation} />
+        <MessageForm
+          uuid={uuid}
+          updateConversation={this.updateConversation}
+        />
       </div>
     );
   }

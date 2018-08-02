@@ -5,7 +5,7 @@ import './PeerEntry.css';
 const PeerEntry = ({ peer }) => (
   <li>
     <div className="peer-entry">
-      { peer.username }
+      { peer.name }
     </div>
   </li>
 );

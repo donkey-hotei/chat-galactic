@@ -1,4 +1,4 @@
-.inputbox {
+.messageform {
     width: 510px;
     height: 27px;
     background: #ccf;
@@ -8,7 +8,7 @@
 
     padding: 5px;
     margin-top: 20px;
-    margin-left: 0px;
+    margin-left: -10px;
     margin-right: 10px;
     box-shadow: -0.5em 0.5em #000;
 
