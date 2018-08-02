@@ -1,14 +1,12 @@
-// Copyright 2013 The Gorilla WebSocket Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 package main
 
 import (
 	"bytes"
 	"fmt"
 	"github.com/gorilla/websocket"
+	"github.com/nu7hatch/gouuid"
 	"log"
+	"math/rand"
 	"net/http"
 	"time"
 )
@@ -43,12 +41,14 @@ var upgrader = websocket.Upgrader{
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
 	hub *Hub
-
 	// The websocket connection.
 	conn *websocket.Conn
-
 	// Buffered channel of outbound messages.
 	send chan []byte
+	// Unique identifier
+	uuid string
+	// Username
+	name string
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -137,6 +137,33 @@ func (c *Client) writePump() {
 	}
 }
 
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+var letters = []rune("abcdefghijklmnopqrstuvwzyz")
+
+func randSeq(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+
+func NewClient(hub *Hub, conn *websocket.Conn) *Client {
+	id, _ := uuid.NewV4()
+	name := randSeq(5)
+	client := &Client{
+		hub:  hub,
+		conn: conn,
+		uuid: id.String(),
+		name: name,
+		send: make(chan []byte, 256),
+	}
+	return client
+}
+
 // serveWs handles websocket requests from the peer.
 func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -144,9 +171,8 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+	client := NewClient(hub, conn)
 	client.hub.register <- client
-
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.
 	go client.writePump()
